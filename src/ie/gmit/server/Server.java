@@ -61,44 +61,43 @@ class ClientServiceThread extends Thread {
 					
 					// Register
 					if(outerMenu.compareToIgnoreCase("1")==0){
-						do {
-							usernameFree = true;
-							sendMessage("Enter username");
-							username = (String)in.readObject();
-							sendMessage("Enter password");
-							password = (String)in.readObject();
+						usernameFree = true;
+						sendMessage("Enter username");
+						username = (String)in.readObject();
+						sendMessage("Enter password");
+						password = (String)in.readObject();
+						
+						// Read users.txt to check if user name is free
+						BufferedReader br = null;
+						br = new BufferedReader(new InputStreamReader(new FileInputStream("users.txt")));
+						
+						String ln = "";
+						while((ln = br.readLine()) != null){
+							String[] credentials = ln.split("\\s");
 							
-							// Read users.txt to check if user name is free
-							BufferedReader br = null;
-							br = new BufferedReader(new InputStreamReader(new FileInputStream("users.txt")));
-							
-							String ln = "";
-							while((ln = br.readLine()) != null){
-								String[] credentials = ln.split("\\s");
-								
-								if (credentials[0].equals(username)){
-									usernameFree = false;						// Set boolean
-									sendMessage("Username already in use");		// Confirmation message (false)
-									sendMessage("false");						// Send Confirmation message
-									break;
-								}							
-							}
-							br.close();
-							
-							if(usernameFree){							
-								BufferedWriter bw = null;
-								bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("users.txt", true)));
-								
-								bw.append(username + " " + password);
-								bw.newLine();
-								
-								// write user name and password to users.txt
-								bw.close();
-								
-								sendMessage("Profile registered");				// Confirmation message (true)
-								sendMessage("true");							// Send confirmation message
+							if (credentials[0].equals(username)){
+								usernameFree = false;						// Set boolean
+								sendMessage("Username already in use");		// Confirmation message (false)
+								sendMessage("false");						// Send Confirmation message
+								break;
 							}							
-						} while(usernameFree == false);
+						}
+						br.close();
+						
+						if(usernameFree){							
+							BufferedWriter bw = null;
+							bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("users.txt", true)));
+							
+							bw.append(username + " " + password);
+							bw.newLine();
+							
+							// Write user name and password to users.txt
+							bw.close();
+							
+							
+							sendMessage("Profile registered");				// Confirmation message (true)
+							sendMessage("true");							// Send confirmation message								
+						}							
 					}
 					
 					// LOG IN
@@ -129,20 +128,35 @@ class ClientServiceThread extends Thread {
 							if (loggedIn == false){
 								sendMessage("false");
 							}
-							
-							
 							if (loggedIn == true) {
 								// INNER MENU
 								do {
-									sendMessage("\n1) Add a Fitness Record\n2)Add Meal Record\n3) View last 10 Records\n4) View last 10 Fitness Records"
+									String mode;
+									String duration;
+									
+									sendMessage("\n1) Add a Fitness Record\n2) Add Meal Record\n3) View last 10 Records\n4) View last 10 Fitness Records"
 											+ "	\n5) Delete a Fitness Record\n6) Logout");
 									innerMenu = (String)in.readObject();				// take in user choice
 									
 									// 1. Add a Fitness Record
 									if (innerMenu.equals("1")){
+										// Assign Mode
 										sendMessage("Add fitness record selected");
-										sendMessage("Enter mode (cycling/walking/running)");
-										message = (String)in.readObject();				// take in user mode asa
+										sendMessage("Enter activity (one word only)");					 
+										mode = (String)in.readObject();					// take in mode
+											
+										// Assign Duration (Needs error handling)
+										sendMessage("Enter duration of exercise (minutes)");
+										duration = (String)in.readObject();										
+										
+										// Print record to file
+										BufferedWriter bw = null;
+										bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(username+".txt", true)));
+										
+										bw.append("F " + mode + " " + duration + "mins");
+										bw.newLine();
+										
+										bw.close();
 									}
 									else if (innerMenu.equals("2")){
 										sendMessage("Add meal record selected");
