@@ -142,7 +142,7 @@ class ClientServiceThread extends Thread {
 									if (innerMenu.equals("1")){
 										sendMessage("Add fitness record selected");
 										sendMessage("Enter mode (cycling/walking/running)");
-										message = (String)in.readObject();				// take in user mode
+										message = (String)in.readObject();				// take in user mode asa
 									}
 									else if (innerMenu.equals("2")){
 										sendMessage("Add meal record selected");
