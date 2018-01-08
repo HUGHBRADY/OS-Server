@@ -3,6 +3,7 @@ package ie.gmit.server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Stack;
 
 public class Server {
   public static void main(String[] args) throws Exception {
@@ -55,7 +56,7 @@ class ClientServiceThread extends Thread {
 			
 			do {
 				try {
-					// first menu
+					// First menu
 					sendMessage("\n1) Register\n2) Log In\n3) Exit");
 					outerMenu = (String)in.readObject();
 					
@@ -115,7 +116,7 @@ class ClientServiceThread extends Thread {
 							// Placeholder String
 							String ln = "";
 							while((ln = br.readLine()) != null){
-								String[] credentials = ln.split("\\s");
+								String[] credentials = ln.split("\\s+", 3);
 								
 								if (credentials[0].equals(username) && credentials[1].equals(password)){
 									loggedIn = true;
@@ -134,8 +135,8 @@ class ClientServiceThread extends Thread {
 									String mode;
 									String duration;
 									
-									sendMessage("\n1) Add a Fitness Record\n2) Add Meal Record\n3) View last 10 Records\n4) View last 10 Fitness Records"
-											+ "	\n5) Delete a Fitness Record\n6) Logout");
+									sendMessage("\n1) Add a Fitness Record\n2) Add Meal Record\n3) View last 10 Records\n"
+											+ "4) View last 10 Fitness Records\n5) Delete a Fitness Record\n6) Logout");
 									innerMenu = (String)in.readObject();				// take in user choice
 									
 									// 1. Add a Fitness Record
@@ -159,23 +160,94 @@ class ClientServiceThread extends Thread {
 										bw.close();
 									}
 									else if (innerMenu.equals("2")){
+										String meal = "null";
+										boolean validM = false;
+										String desc;
 										sendMessage("Add meal record selected");
+										
+										// Meal type - needs error handling
+										do {
+											sendMessage("Enter type of meal (breakfast/lunch/dinner/snack)");
+											message = (String)in.readObject();
+											
+											if(message.equalsIgnoreCase("breakfast") || message.equalsIgnoreCase("b")){
+												validM = true;
+												meal = "Breakfast";
+											}
+											else if(message.equalsIgnoreCase("lunch") || message.equalsIgnoreCase("l")){
+												validM = true;
+												meal = "Lunch";
+											}
+											else if(message.equalsIgnoreCase("dinner") || message.equalsIgnoreCase("d")){
+												validM = true;
+												meal = "Dinner";
+											}
+											else if(message.equalsIgnoreCase("snack") || message.equalsIgnoreCase("s")){
+												validM = true;
+												meal = "Snack";
+											}
+											else {
+												validM = false;
+											}	
+											
+											// Tell client if meal is valid
+											if (validM == true){
+												sendMessage("true");
+											}
+											else{
+												sendMessage("false");
+											}
+										}while (validM == false);
+										
+										// Set description
+										sendMessage("Enter description of meal");
+										desc = (String)in.readObject();
+										
+										// Print record to file
+										BufferedWriter bw = null;
+										bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(username+".txt", true)));
+										
+										bw.append("M " + meal + " " + desc);
+										bw.newLine();
+										
+										bw.close();
 									}
 									else if (innerMenu.equals("3")){
 										sendMessage("View the last 10 records selected");
+										
+										String[] lns = new String[10];
+										int count = 0;
+										
+										ln = null;
+										BufferedReader viewRec = null;
+										viewRec = new BufferedReader(new InputStreamReader(new FileInputStream(username + ".txt")));
+										
+										//Loops through user file and take in last 10 entered records
+										while ((ln = viewRec.readLine()) != null) {
+									    	lns[count % lns.length] = ln;
+										    count++;
+										}
+										viewRec.close();
+										int start = count - 10;
+										if (start < 0) {
+										    start = 0;
+										}
+										// Displays last 10 lines by looping through array
+										for (int i = start; i < count; i++) {
+										    sendMessage(lns[i % lns.length]);
+										}
 									}
 									else if (innerMenu.equals("4")){
 										sendMessage("View the last 10 fitness records selected");
 									}
 									else if (innerMenu.equals("5")){
-										sendMessage("Delete a fitness record selected");
+										sendMessage("You don't 'delete' records you 'lose' them.");
 									}
 									else {
 										sendMessage("Invalid choice, try again");
 									}
 									
-								} while(!innerMenu.equals("6"));
-								
+								} while(!innerMenu.equals("6"));								
 							}
 						}
 						catch (FileNotFoundException e) {

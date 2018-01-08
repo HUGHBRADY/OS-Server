@@ -1,2 +1,8 @@
-F running nullmins
 F jumping 3mins
+F Swim 45mins
+M Dinner carrots
+M Breakfast Eggs
+M Lunch ham  
+M Breakfast Sauteed 
+F hiking 120mins
+M Lunch mumbo
